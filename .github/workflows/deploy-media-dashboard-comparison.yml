@@ -48,6 +48,9 @@ jobs:
           BRANDWATCH_TOKEN: ${{ secrets.BRANDWATCH_TOKEN }}
           MELTWATER_TOKEN: ${{ secrets.MELTWATER_TOKEN }}
           TALKWALKER_TOKEN: ${{ secrets.TALKWALKER_TOKEN }}
+          GDELT_REQUEST_TIMEOUT: "4"
+          GDELT_RETRIES: "1"
+          GDELT_MAX_CONSECUTIVE_FAILURES: "2"
 
       - name: Build Antigravity dataset if present
         run: |
