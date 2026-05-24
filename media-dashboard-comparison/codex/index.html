@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Novo Nordisk vs Eli Lilly Media Exposure Dashboard</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="section-label">GitHub Actions-generated real data</p>
+        <h1>Novo Nordisk vs Eli Lilly media exposure</h1>
+        <p class="lede">Compare GLP-1, obesity, diabetes, product, pipeline, access, safety, pricing, and competition narratives from GDELT DOC 2.0 coverage.</p>
+      </div>
+      <div class="status-card">
+        <span class="status-dot"></span>
+        <div>
+          <strong id="lastUpdated">Loading generated data</strong>
+          <span id="coverageWindow">Waiting for static JSON files</span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section id="loadError" class="load-error hidden">
+        Generated data files were not found on the deployed site. Check the GitHub Actions data pipeline and Pages artifact.
+      </section>
+
+      <section class="filters" aria-label="Global filters">
+        <label>Date range
+          <select id="dateRange">
+            <option value="7">7d</option>
+            <option value="30" selected>30d</option>
+            <option value="90">90d</option>
+          </select>
+        </label>
+        <label>Company
+          <select id="companyFilter">
+            <option>Both</option>
+            <option>Novo Nordisk</option>
+            <option>Eli Lilly</option>
+          </select>
+        </label>
+        <label>Channel
+          <select id="channelFilter"><option>All</option></select>
+        </label>
+        <label>Topic
+          <select id="topicFilter"><option>All</option></select>
+        </label>
+        <label>Sentiment
+          <select id="sentimentFilter">
+            <option>All</option>
+            <option>Positive</option>
+            <option>Neutral</option>
+            <option>Negative</option>
+          </select>
+        </label>
+        <label>Source tier
+          <select id="tierFilter"><option>All</option></select>
+        </label>
+        <label class="search-label">Search
+          <input id="searchBox" type="search" placeholder="Title, source, keyword">
+        </label>
+      </section>
+
+      <nav class="tabs" aria-label="Dashboard tabs">
+        <button class="active" data-tab="overview">Overview</button>
+        <button data-tab="channels">Channels</button>
+        <button data-tab="topics">Topics</button>
+        <button data-tab="trends">Trends</button>
+        <button data-tab="explorer">Explorer</button>
+        <button data-tab="alerts">Alerts</button>
+        <button data-tab="quality">Data Quality</button>
+      </nav>
+
+      <section id="emptyState" class="empty-state hidden">
+        <h2>No records in the generated dataset</h2>
+        <p>GDELT returned zero records for the configured queries. The dashboard is loaded correctly, but there is no coverage to chart for this run.</p>
+      </section>
+
+      <section class="tab-panel active" id="overview">
+        <div class="kpi-grid" id="kpiGrid"></div>
+        <div class="chart-grid">
+          <article class="panel wide">
+            <header><h2>Mentions over time</h2><span>Daily article counts</span></header>
+            <div id="mentionsChart" class="chart"></div>
+          </article>
+          <article class="panel">
+            <header><h2>Sentiment distribution</h2><span>Record-level tone</span></header>
+            <div id="sentimentChart" class="chart"></div>
+          </article>
+          <article class="panel">
+            <header><h2>Source tiers</h2><span>Authority proxy mix</span></header>
+            <div id="tierChart" class="chart"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="channels">
+        <div class="chart-grid">
+          <article class="panel wide">
+            <header><h2>Share of voice by channel</h2><span>Company split within each channel</span></header>
+            <div id="channelChart" class="chart"></div>
+          </article>
+          <article class="panel wide">
+            <header><h2>Top sources</h2><span>Domains with the most matched coverage</span></header>
+            <div id="sourceList" class="rank-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="topics">
+        <div class="chart-grid">
+          <article class="panel">
+            <header><h2>Topic mix</h2><span>Narrative buckets</span></header>
+            <div id="topicChart" class="chart"></div>
+          </article>
+          <article class="panel wide">
+            <header><h2>Topic heatmap</h2><span>Topic by company volume</span></header>
+            <div id="topicHeatmap" class="heatmap"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="trends">
+        <div class="chart-grid">
+          <article class="panel wide">
+            <header><h2>Spike trend chart</h2><span>Seven-day moving comparison</span></header>
+            <div id="spikeChart" class="chart"></div>
+          </article>
+          <article class="panel">
+            <header><h2>Momentum notes</h2><span>Recent versus prior period</span></header>
+            <div id="momentumNotes" class="notes"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="explorer">
+        <div class="table-actions">
+          <button id="exportCsv">Export filtered CSV</button>
+          <span id="tableCount"></span>
+        </div>
+        <div class="explorer-layout">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th data-sort="date">Date</th>
+                  <th data-sort="company">Company</th>
+                  <th data-sort="source">Source</th>
+                  <th data-sort="topic">Topic</th>
+                  <th data-sort="sentiment">Sentiment</th>
+                  <th data-sort="title">Title</th>
+                </tr>
+              </thead>
+              <tbody id="mentionsTable"></tbody>
+            </table>
+          </div>
+          <aside id="detailPanel" class="detail-panel">
+            <h2>Select a row</h2>
+            <p>Article details, matched keywords, proxy notes, and the external link will appear here.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="alerts">
+        <div id="alertsList" class="alerts-list"></div>
+      </section>
+
+      <section class="tab-panel" id="quality">
+        <div class="quality-grid">
+          <article class="panel"><h2>Run metadata</h2><dl id="metadataList"></dl></article>
+          <article class="panel"><h2>Proxy metric caveat</h2><p>GDELT does not provide true impressions or social engagement. For GDELT records, reach and source authority are rule-based proxies, and engagement is zero unless imported data supplies actual engagement.</p></article>
+          <article class="panel wide"><h2>Query definitions</h2><pre id="queryDefinitions"></pre></article>
+          <article class="panel wide"><h2>Data files</h2><p><a href="./data/generated/metadata.json">metadata.json</a> <a href="./data/generated/mentions.json">mentions.json</a></p><div id="warningsList" class="warnings"></div></article>
+        </div>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

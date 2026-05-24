@@ -1,0 +1,42 @@
+{
+  "lastUpdated": "2026-05-24T15:31:51.444619+00:00",
+  "coverageStart": "2026-02-23",
+  "coverageEnd": "2026-05-24",
+  "recordCount": 0,
+  "sourcesUsed": [
+    "GDELT"
+  ],
+  "sourcesUnavailable": [
+    "Mediastack",
+    "NewsAPI",
+    "Brandwatch",
+    "Meltwater",
+    "Talkwalker"
+  ],
+  "proxyMetricFields": [
+    "reach",
+    "sourceAuthority",
+    "engagement"
+  ],
+  "warnings": [
+    "GDELT window failed for 2026-02-23 to 2026-03-02: HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Read timed out. (read timeout=4.0)",
+    "GDELT window failed for 2026-03-02 to 2026-03-09: HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Read timed out. (read timeout=4.0)",
+    "Stopped additional GDELT windows for Novo Nordisk after 2 consecutive fetch failures.",
+    "GDELT window failed for 2026-02-23 to 2026-03-02: HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Read timed out. (read timeout=4.0)",
+    "GDELT window failed for 2026-03-02 to 2026-03-09: HTTPSConnectionPool(host='api.gdeltproject.org', port=443): Read timed out. (read timeout=4.0)",
+    "Stopped additional GDELT windows for Eli Lilly after 2 consecutive fetch failures.",
+    "GDELT returned zero records for the configured queries.",
+    "Antigravity comparison dataset generated from the same GitHub Actions real-data pipeline outputs for deployment validation; no fake records were added."
+  ],
+  "queryDefinitions": {
+    "Novo Nordisk": {
+      "query": "(\"Novo Nordisk\" OR Ozempic OR Wegovy OR Rybelsus OR semaglutide OR \"oral semaglutide\")",
+      "falsePositiveControls": "Standalone Novo is retained only with GLP-1, obesity, diabetes, or pharma context."
+    },
+    "Eli Lilly": {
+      "query": "(\"Eli Lilly\" OR Mounjaro OR Zepbound OR tirzepatide OR orforglipron OR retatrutide)",
+      "falsePositiveControls": "Standalone Lilly is retained only with GLP-1, obesity, diabetes, or pharma context."
+    }
+  },
+  "version": "antigravity"
+}

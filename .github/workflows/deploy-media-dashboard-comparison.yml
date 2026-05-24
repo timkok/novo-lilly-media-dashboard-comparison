@@ -1,0 +1,97 @@
+name: Deploy media dashboard comparison
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "media-dashboard-comparison/**"
+      - ".github/workflows/deploy-media-dashboard-comparison.yml"
+  schedule:
+    - cron: "0 10 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "media-dashboard-comparison-pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Codex Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r media-dashboard-comparison/codex/scripts/requirements.txt
+
+      - name: Build Codex real dataset
+        run: python media-dashboard-comparison/codex/scripts/build_dataset.py
+        env:
+          MEDIASTACK_API_KEY: ${{ secrets.MEDIASTACK_API_KEY }}
+          NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
+          BRANDWATCH_TOKEN: ${{ secrets.BRANDWATCH_TOKEN }}
+          MELTWATER_TOKEN: ${{ secrets.MELTWATER_TOKEN }}
+          TALKWALKER_TOKEN: ${{ secrets.TALKWALKER_TOKEN }}
+
+      - name: Build Antigravity dataset if present
+        run: |
+          if [ -f media-dashboard-comparison/antigravity/scripts/build_dataset.py ]; then
+            if [ -f media-dashboard-comparison/antigravity/scripts/requirements.txt ]; then
+              pip install -r media-dashboard-comparison/antigravity/scripts/requirements.txt
+            fi
+            python media-dashboard-comparison/antigravity/scripts/build_dataset.py
+          else
+            echo "No Antigravity dataset builder found yet."
+          fi
+        env:
+          MEDIASTACK_API_KEY: ${{ secrets.MEDIASTACK_API_KEY }}
+          NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
+          BRANDWATCH_TOKEN: ${{ secrets.BRANDWATCH_TOKEN }}
+          MELTWATER_TOKEN: ${{ secrets.MELTWATER_TOKEN }}
+          TALKWALKER_TOKEN: ${{ secrets.TALKWALKER_TOKEN }}
+
+      - name: Verify Codex generated data exists
+        run: |
+          test -s media-dashboard-comparison/codex/data/generated/mentions.json
+          test -s media-dashboard-comparison/codex/data/generated/metadata.json
+          test -s media-dashboard-comparison/codex/data/generated/daily_counts.json
+          test -s media-dashboard-comparison/codex/data/generated/source_summary.json
+          test -s media-dashboard-comparison/codex/data/generated/topic_summary.json
+          test -s media-dashboard-comparison/codex/data/generated/alerts.json
+
+      - name: Ensure nojekyll
+        run: touch media-dashboard-comparison/.nojekyll
+
+      - name: Prepare Pages artifact root
+        run: |
+          rm -rf _site
+          mkdir -p _site
+          cp -R media-dashboard-comparison _site/media-dashboard-comparison
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload comparison site artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

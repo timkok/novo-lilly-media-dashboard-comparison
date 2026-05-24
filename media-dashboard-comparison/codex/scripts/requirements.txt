@@ -1,0 +1,3 @@
+gdeltdoc
+requests
+python-dateutil
